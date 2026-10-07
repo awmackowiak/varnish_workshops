@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="380" viewBox="0 0 900 380" font-family="Helvetica, Arial, sans-serif" font-size="15">
+  <defs><marker id="a" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#333"/></marker></defs>
+  <g fill="#e8f0fe" stroke="#1a73e8" stroke-width="2">
+    <rect x="20" y="40" width="120" height="44" rx="8"/><rect x="190" y="40" width="120" height="44" rx="8"/>
+    <rect x="360" y="40" width="120" height="44" rx="8"/><rect x="740" y="40" width="130" height="44" rx="8"/>
+  </g>
+  <g fill="#fff4e5" stroke="#f29900" stroke-width="2">
+    <rect x="360" y="150" width="120" height="44" rx="8"/><rect x="530" y="150" width="120" height="44" rx="8"/>
+    <rect x="360" y="260" width="140" height="44" rx="8"/><rect x="560" y="260" width="170" height="44" rx="8"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="80" y="68">vcl_recv</text><text x="250" y="68">vcl_hash</text><text x="420" y="68">lookup</text><text x="805" y="68">vcl_deliver</text>
+    <text x="420" y="178">vcl_hit</text><text x="590" y="178">vcl_miss</text>
+    <text x="430" y="288">vcl_backend_fetch</text><text x="645" y="288">vcl_backend_response</text>
+    <text x="420" y="130" font-size="13">found</text><text x="560" y="115" font-size="13">not found</text>
+    <text x="450" y="350" font-size="13" fill="#555">Client side (blue/top): req.*, resp.*, obj.*   |   Backend side (orange): bereq.*, beresp.*</text>
+  </g>
+  <g stroke="#333" stroke-width="2" fill="none" marker-end="url(#a)">
+    <line x1="140" y1="62" x2="188" y2="62"/><line x1="310" y1="62" x2="358" y2="62"/>
+    <line x1="420" y1="84" x2="420" y2="148"/>
+    <path d="M480 62 L590 62 L590 148"/>
+    <path d="M480 172 L520 172" stroke-opacity="0"/>
+    <path d="M420 194 L420 220 L800 220 L800 86" />
+    <path d="M590 194 L590 230 L430 230 L430 258"/>
+    <line x1="500" y1="282" x2="558" y2="282"/>
+    <path d="M730 282 L770 282 L770 224" />
+  </g>
+</svg>

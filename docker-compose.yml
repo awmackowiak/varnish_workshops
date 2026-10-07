@@ -1,0 +1,20 @@
+services:
+  varnish:
+    build: ./varnish
+    ports:
+      - "8081:6081"   # HTTP via Varnish
+    volumes:
+      - ./varnish/vcl:/etc/varnish:ro   # edit VCL on host, reload in container
+    depends_on: [backend1, backend2]
+    environment:
+      VARNISH_MEM: ${VARNISH_MEM:-128m}
+
+  backend1:
+    build: ./backend
+    environment: { BACKEND_NAME: backend1 }
+    ports: ["8091:8080"]   # direct access for toggling/comparison
+
+  backend2:
+    build: ./backend
+    environment: { BACKEND_NAME: backend2 }
+    ports: ["8092:8080"]
