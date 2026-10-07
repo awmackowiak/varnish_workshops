@@ -1,6 +1,6 @@
 vcl 4.0;
 
-# Starter VCL: pass-through to a single backend. Exercises build on this.
+# Valid bootstrap: rename default to backend1 in Ex1. Built-in VCL still caches.
 backend default {
     .host = "backend1";
     .port = "8080";

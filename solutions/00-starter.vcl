@@ -1,5 +1,6 @@
 vcl 4.0;
 
+# Valid bootstrap: rename default to backend1 in Ex1. Built-in VCL still caches.
 backend default {
     .host = "backend1";
     .port = "8080";
@@ -9,10 +10,6 @@ sub vcl_recv {
 }
 
 sub vcl_backend_response {
-    # Ex2: override TTL for /time (backend says 10s, we want 5s)
-    if (bereq.url ~ "^/time") {
-        set beresp.ttl = 5s;
-    }
 }
 
 sub vcl_deliver {

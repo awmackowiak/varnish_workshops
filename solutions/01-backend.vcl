@@ -1,15 +1,8 @@
 vcl 4.0;
 
-# Starter VCL: pass-through to a single backend. Exercises build on this.
-backend default {
+backend backend1 {
     .host = "backend1";
     .port = "8080";
-}
-
-sub vcl_recv {
-}
-
-sub vcl_backend_response {
 }
 
 sub vcl_deliver {

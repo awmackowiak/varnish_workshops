@@ -10,12 +10,13 @@ Endpoints:
   /error             returns 500
   /healthz           health probe; returns 503 after POST /toggle
   POST /toggle       flip health (for failover exercise)
+  POST /health/up    set healthy (idempotent)
+  POST /health/down  set unhealthy (idempotent)
 """
 
 import os
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import override
 from urllib.parse import urlparse, parse_qs
 
 NAME = os.environ.get("BACKEND_NAME", "backend")
@@ -32,11 +33,19 @@ class H(BaseHTTPRequestHandler):
         for k, v in (headers or {}).items():
             self.send_header(k, v)
         self.end_headers()
-        self.wfile.write(data)
+        if self.command != "HEAD":
+            self.wfile.write(data)
+
+    def do_HEAD(self):
+        self.do_GET()
 
     def do_POST(self):
         global healthy
-        if urlparse(self.path).path == "/toggle":
+        path = urlparse(self.path).path
+        if path in ("/health/up", "/health/down"):
+            healthy = path == "/health/up"
+            return self._send(200, f"{NAME} healthy={healthy}\n")
+        if path == "/toggle":
             healthy = not healthy
             return self._send(200, f"{NAME} healthy={healthy}\n")
         self._send(404, "not found\n")
@@ -56,7 +65,12 @@ class H(BaseHTTPRequestHandler):
             return self._send(
                 200,
                 f"nocache from {NAME} {time.time()}\n",
-                {"Cache-Control": "no-store"},
+                {
+                    "Cache-Control": "no-store",
+                    "X-Seen-Workshop": self.headers.get("X-Workshop", ""),
+                    "X-Seen-Remove-Me": self.headers.get("X-Remove-Me", ""),
+                    "X-Seen-URL": self.path,
+                },
             )
         if p == "/slow":
             ms = int(parse_qs(u.query).get("ms", ["2000"])[0])
@@ -89,4 +103,4 @@ class H(BaseHTTPRequestHandler):
         print(f"[{NAME}] {fmt % args}", flush=True)
 
 
-ThreadingHTTPServer(("0.0.0.0", 8080), H).serve_forever()
+ThreadingHTTPServer(("0.0.0.0", int(os.environ.get("PORT", "8080"))), H).serve_forever()
