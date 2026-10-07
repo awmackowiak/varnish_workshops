@@ -1,6 +1,8 @@
 COMPOSE ?= podman-compose
 PODMAN ?= podman
-.PHONY: up down check reload vsh reset solution
+PYTHON ?= python3
+MARP_VERSION := 4.5.1
+.PHONY: up down check reload vsh reset solution test test-lab slides
 up:
 	$(COMPOSE) up -d --build
 down:
@@ -12,8 +14,14 @@ reload: ## load edited VCL without restart
 vsh:
 	$(COMPOSE) exec varnish bash
 reset:  ## restore the starter VCL
-	cp solutions/01-request-flow.vcl varnish/vcl/default.vcl
+	cp solutions/00-starter.vcl varnish/vcl/default.vcl
 	$(MAKE) reload
-solution: ## mentor: load a solution, e.g. make solution N=02-ttl
+test:
+	$(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v
+test-lab: check
+	COMPOSE="$(COMPOSE)" $(PYTHON) tests/rehearse.py
+slides:
+	npx --yes @marp-team/marp-cli@$(MARP_VERSION) slides.md --html -o slides.html
+solution: ## mentor: load a solution, e.g. make solution N=04-ttl-vary
 	cp solutions/$(N).vcl varnish/vcl/default.vcl
 	$(MAKE) reload

@@ -1,34 +1,12 @@
 vcl 4.0;
 
-import directors;
-
-probe healthz {
-    .url = "/healthz";
-    .interval = 2s;
-    .timeout = 1s;
-    .window = 3;
-    .threshold = 2;
-}
-
 backend backend1 {
     .host = "backend1";
     .port = "8080";
-    .probe = healthz;
 }
 
-backend backend2 {
-    .host = "backend2";
-    .port = "8080";
-    .probe = healthz;
-}
-
-sub vcl_init {
-    new pool = directors.round_robin();
-    pool.add_backend(backend1);
-    pool.add_backend(backend2);
-}
-
-# Lab only: do not copy broad private-network authorization to production.
+# Lab only: allow host requests forwarded through the container network.
+# Production must authorize only explicitly trusted invalidation clients.
 acl purge {
     "localhost";
     "127.0.0.1";
@@ -40,7 +18,6 @@ acl purge {
 sub vcl_recv {
     set req.http.X-Workshop = "varnish-lab";
     unset req.http.X-Remove-Me;
-    set req.backend_hint = pool.backend();
     if (req.url ~ "^/static([?].*)?$") {
         unset req.http.Cookie;
     }
@@ -74,10 +51,6 @@ sub vcl_backend_response {
     if (bereq.url ~ "^/cookie([?].*)?$") {
         unset beresp.http.Set-Cookie;
     }
-}
-
-sub vcl_hash {
-    hash_data(req.http.User-Agent);
 }
 
 sub vcl_deliver {
