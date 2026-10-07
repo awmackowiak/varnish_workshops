@@ -1,6 +1,6 @@
 # Varnish 6.0 Hands-on Lab (participant guide)
 
-Two sessions of ~2h. Session 1: Ex0-Ex4. Session 2: Ex5-Ex9.
+Two sessions of ~2h. Session 1: Ex0-Ex4 (incl. Ex3b). Session 2: Ex5-Ex9.
 
 Setup: `make up && make check` (must print varnish-6.0.18). Varnish: <http://localhost:8081>.
 Backends direct: :8091 (backend1), :8092 (backend2). Edit `varnish/vcl/default.vcl`, apply with `make reload`, check with `./verify.sh N`.
@@ -24,6 +24,10 @@ Then request `/nocache` twice: why is it never a HIT? Watch it in `varnishlog -g
 ## Ex3 - Cookies and Vary (25 min)
 
 `/cookie` sends `Set-Cookie`, so Varnish will not cache it. Strip the header for that path only; discuss why doing this globally is dangerous. Then call `/vary` with different `Accept-Language` headers (`curl -sI -H 'Accept-Language: pl' ...`) and see that each value is cached separately (MISS once per value).
+
+## Ex3b - Set and unset headers (15 min)
+
+Headers are the everyday tool of VCL. In `vcl_deliver`: `unset resp.http.Server` (hide backend software) and `set resp.http.X-Cache-Hits = obj.hits;`. In `vcl_recv`: `set req.http.X-Forwarded-Proto = "http";` and `unset req.http.Cookie;` for `/static` only. See the request-side change in `varnishlog -g request` (`BereqHeader` lines). Discuss: which headers should never leak to clients (`Server`, `X-Backend`, `Via`)? Check: `./verify.sh 3`.
 
 ## Ex4 - Invalidation and grace (20 min)
 

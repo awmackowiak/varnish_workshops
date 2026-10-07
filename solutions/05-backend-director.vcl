@@ -38,6 +38,10 @@ acl purge {
 }
 
 sub vcl_recv {
+    set req.http.X-Forwarded-Proto = "http";
+    if (req.url ~ "^/static") {
+        unset req.http.Cookie;
+    }
     set req.backend_hint = pool.backend();
     if (req.method == "PURGE") {
         if (!client.ip ~ purge) {
@@ -62,6 +66,8 @@ sub vcl_backend_response {
 }
 
 sub vcl_deliver {
+    unset resp.http.Server;
+    set resp.http.X-Cache-Hits = obj.hits;
     if (obj.hits > 0) {
         set resp.http.X-Cache = "HIT";
     } else {

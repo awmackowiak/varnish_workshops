@@ -35,6 +35,8 @@ ex3() {
   local u="$V/cookie?cb=$(rnd)"
   curl -s -o /dev/null $u
   check "3 /cookie cached (HIT) after stripping Set-Cookie" "$(hdr $u X-Cache)" HIT
+  check "3b Server header removed" "$(hdr $u Server)" ""
+  check "3b X-Cache-Hits set" "$([ -n "$(hdr $u X-Cache-Hits)" ] && echo yes || echo no)" yes
 }
 ex4() {
   local u="$V/static?cb=$(rnd)"

@@ -20,6 +20,12 @@ Two sessions (~2h each): Ex1-4 then Ex5-9. Pre-session: `make up && make check`;
 - Discuss risk: stripping Set-Cookie globally leaks a session to other users. Limit to known static paths.
 - Vary: `Vary: *` or high-cardinality headers (User-Agent) destroy hit ratio.
 
+## Ex3b
+
+- `set`/`unset` work on `req.http.*`, `bereq.http.*`, `beresp.http.*`, `resp.http.*`; which one is allowed depends on the subroutine (e.g. `resp` only in `vcl_deliver`/`vcl_synth`).
+- Common trap: unsetting `req.http.Cookie` globally, or `unset resp.http.Server` in `vcl_recv` (compile error).
+- `X-Backend` is also a header the backend sets; stripping it hides topology in production but the labs need it, so only unset `Server`.
+
 ## Ex4
 
 - Purge returns 405 from containers if ACL misses the podman network; the solution allows private ranges.

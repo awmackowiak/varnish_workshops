@@ -104,10 +104,48 @@ Docs: <https://varnish-cache.org/docs/6.0/users-guide/vcl-grace.html> , .../user
 
 ---
 
+# VCL headers: set and unset
+
+```vcl
+sub vcl_recv {
+    set req.http.X-Forwarded-Proto = "http";
+    if (req.url ~ "^/static") { unset req.http.Cookie; }
+}
+sub vcl_deliver {
+    unset resp.http.Server;
+    set resp.http.X-Cache-Hits = obj.hits;
+}
+```
+
+- Objects: `req.http.*` (client request), `bereq.http.*` (to backend), `beresp.http.*` (from backend), `resp.http.*` (to client)
+- Which one is writable depends on the subroutine (`resp` only in `vcl_deliver`/`vcl_synth`)
+- Hide internals (`Server`, `Via`); never `unset req.http.Cookie` globally
+- Docs: <https://varnish-cache.org/docs/6.0/reference/vcl.html#variables>
+
+---
+
+# TTL and grace
+
+```vcl
+sub vcl_backend_response {
+    set beresp.ttl   = 5s;   # fresh: served as HIT
+    set beresp.grace = 1m;   # stale: served while refetching / backend sick
+}
+```
+
+- Object lifetime = `ttl` + `grace` (+ `keep`); `Age` counts from fetch
+- Within TTL: HIT. After TTL, inside grace: stale served, one background refresh
+- Backend down: stale kept serving until grace ends (needs a probe to know it is sick)
+- Never cache errors: `if (beresp.status >= 500) { return (abandon); }`
+- Docs: <https://varnish-cache.org/docs/6.0/users-guide/vcl-grace.html>
+
+---
+
 # Ex2-Ex4 (end of session 1)
 
 Ex2 override TTL on `/time`
 Ex3 strip cookie on `/cookie`, observe `/vary`
+Ex3b `set`/`unset` request and response headers
 Ex4 PURGE with ACL + grace
 
 Break + recap
